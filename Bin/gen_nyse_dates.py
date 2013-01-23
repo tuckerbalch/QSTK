@@ -13,7 +13,9 @@ http://www.nyse.com/about/newsevents/1176373643795.html
 
 __version__ = "$Revision$"
 
+import numpy as np
 from datetime import *
+
 
 rootday = datetime(2011,1,3) # first monday in 2011
 endday = datetime(2021,1,1) # don't go beyond this date
@@ -147,6 +149,12 @@ NYSEholidays.append(datetime(2018,12,25))
 NYSEholidays.append(datetime(2019,12,25))
 NYSEholidays.append(datetime(2020,12,25))
 
+# Holidays due to unexpected event
+# Sandy
+NYSEholidays.append(datetime(2012,10,29))
+NYSEholidays.append(datetime(2012,10,30))
+
+
 #
 # Now we use Python's set magic to remove the holidays
 #
@@ -155,6 +163,10 @@ setNYSEholidays = set(NYSEholidays)
 newdays = set.difference(setweekdays,NYSEholidays) # remove holidays
 newdays = sorted(list(newdays)) # convert back to sorted list
 
+log = []
 # print it out
 for i in newdays:
 	print i.strftime("%m/%d/%Y")
+	log.append(i.strftime("%m/%d/%Y"))
+
+np.savetxt('NYSE_dates.csv', log, fmt='%s', delimiter=',') 

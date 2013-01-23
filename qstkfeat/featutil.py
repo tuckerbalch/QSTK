@@ -126,7 +126,7 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
                     if 'i_bars' in ldArgs[i]:
                         dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
                     else:    
-                    dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
+                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
             else:
                 ldfRet.append( fcFeature( dDataRelative, **ldArgs[i] ) )
