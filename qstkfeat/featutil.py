@@ -123,16 +123,25 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
                 # bMin means only calculate the LAST row of the stock
                 dTmp = {}
                 for sKey in dDataRelative:
+                    if 'i_bars' in ldArgs[i]:
+                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
+                    else:    
                     dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
             else:
                 ldfRet.append( fcFeature( dDataRelative, **ldArgs[i] ) )
+        
+
+                
         else:
             if bMin:
                 # bMin means only calculate the LAST row of the stock
                 dTmp = {}
                 for sKey in dData:
-                    dTmp[sKey] = dData[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
+                    if 'i_bars' in ldArgs[i]:
+                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
+                    else:    
+                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
             else:
                 ldfRet.append( fcFeature( dData, **ldArgs[i] ) )
