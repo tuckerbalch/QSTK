@@ -25,7 +25,7 @@ import pandas as pd
 def _cache_dates():
     ''' Caches dates '''
     try:
-        filename = os.environ['QS'] + "/qstkutil/NYSE_dates.csv"
+        filename = os.environ['QS'] + "/qstkutil/NYSE_dates.txt"
     except KeyError:
         print "Please be sure to set the value for QS in config.sh or\n"
         print "in local.sh and then \'source local.sh\'.\n"
@@ -170,7 +170,7 @@ def getNextNNYSEdays(startday, days, timeofday):
     @rtype datetime
     """
     try:
-        filename = os.environ['QS'] + "/qstkutil/NYSE_dates.csv"
+        filename = os.environ['QS'] + "/qstkutil/NYSE_dates.txt"
     except KeyError:
         print "Please be sure to set the value for QS in config.sh or\n"
         print "in local.sh and then \'source local.sh\'.\n"
@@ -195,7 +195,7 @@ def getPrevNNYSEday(startday, timeofday):
     @rtype datetime
     """
     try:
-        filename = os.environ['QS'] + "/qstkutil/NYSE_dates.csv"
+        filename = os.environ['QS'] + "/qstkutil/NYSE_dates.txt"
     except KeyError:
         print "Please be sure to set the value for QS in config.sh or\n"
         print "in local.sh and then \'source local.sh\'.\n"
