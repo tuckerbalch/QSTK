@@ -341,15 +341,15 @@ class _MySQL(DriverInterface):
                     if (type(row[i+2])!=datetime.date):
                        columns_fund[i][d_id_sym[row[0]]][dt_date] = row[i+2]
                     else:
-                       columns_fund[i][d_id_sym[row[0]]][dt_date] = int(row[
-                                                   i+2].strftime('%s'))
+                       columns_fund[i][d_id_sym[row[0]]][dt_date] = int((row[
+                              i+2]-datetime.date(1970,1,1)).total_seconds())
         columns = [numpy.NaN]*len(data_item)    
         for i,item in enumerate(li_tech_index):
             columns[item]=columns_tech[i]
         for i,item in enumerate(li_fund_index):
             columns[item]=columns_fund[i]
         
-        
+        print columns
         return columns 
   
 
