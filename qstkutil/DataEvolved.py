@@ -349,7 +349,6 @@ class _MySQL(DriverInterface):
         for i,item in enumerate(li_fund_index):
             columns[item]=columns_fund[i]
         
-        print columns
         return columns 
   
 
