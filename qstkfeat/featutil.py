@@ -82,7 +82,7 @@ def getMarketRel( dData, sRel='$SPX' ):
 
 
 
-def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=False ):
+def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel='$SPX', sLog=None, bMin=False ):
     '''
     @summary: Calculates the feature values using a list of feature functions and arguments.
     @param dData - Dictionary containing data to be used, requires specific naming: open/high/low/close/volume
@@ -101,8 +101,8 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
     ldfRet = []
     
     ''' Calculate market relative data '''
-    if sMarketRel != None:
-        dDataRelative = getMarketRel( dData, sRel=sMarketRel )
+    #if sMarketRel != None:
+    dDataRelative = getMarketRel( dData, sRel=sMarketRel )
     
     
     ''' Loop though feature functions, pass each data dictionary and arguments '''
@@ -124,7 +124,7 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
                 dTmp = {}
                 for sKey in dDataRelative:
                     if 'i_bars' in ldArgs[i]:
-                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
+                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']+1):]
                     else:    
                         dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
@@ -474,8 +474,8 @@ def speedTest(lfcFeature,ldArgs):
     return ltResults
 
 if __name__ == '__main__':
-
-   speedTest([featMA, featRSI, featAroon, featBeta, featCorrelation, 
-              featBollinger, featStochastic], [{'lLookback':30}] * 7) 
+   
+   #speedTest([featMA, featRSI, featAroon, featBeta, featCorrelation, 
+   #           featBollinger, featStochastic], [{'lLookback':30}] * 7) 
    #testFeature( class_fut_ret, {'MR':True})
    pass
