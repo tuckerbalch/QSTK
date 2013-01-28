@@ -124,7 +124,7 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
                 dTmp = {}
                 for sKey in dDataRelative:
                     if 'i_bars' in ldArgs[i]:
-                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
+                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']+1):]
                     else:    
                         dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
@@ -139,9 +139,9 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
                 dTmp = {}
                 for sKey in dData:
                     if 'i_bars' in ldArgs[i]:
-                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
+                        dTmp[sKey] = dData[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
                     else:    
-                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
+                        dTmp[sKey] = dData[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
             else:
                 ldfRet.append( fcFeature( dData, **ldArgs[i] ) )
@@ -474,7 +474,7 @@ def speedTest(lfcFeature,ldArgs):
     return ltResults
 
 if __name__ == '__main__':
-
+   
    speedTest([featMA, featRSI, featAroon, featBeta, featCorrelation, 
               featBollinger, featStochastic], [{'lLookback':30}] * 7) 
    #testFeature( class_fut_ret, {'MR':True})
