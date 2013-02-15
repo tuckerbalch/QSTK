@@ -14,12 +14,14 @@ Created on Nov 7, 2011
 ''' Python imports '''
 import math
 import pickle
+import inspect
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 
 ''' 3rd Party Imports '''
 import numpy as np
 import matplotlib.pyplot as plt
+
 
 ''' Our Imports '''
 import qstklearn.kdtknn as kdt
@@ -124,9 +126,22 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
                 dTmp = {}
                 for sKey in dDataRelative:
                     if 'i_bars' in ldArgs[i]:
-                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']+1):]
-                    else:    
-                        dTmp[sKey] = dDataRelative[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
+                        dTmp[sKey] = dDataRelative[sKey].ix[ 
+                                     -(ldArgs[i]['lLookback'] + 
+                                     ldArgs[i]['i_bars']+1):]
+                    else:  
+                        if 'lLookback' not in ldArgs[i]:
+                            d_defaults = inspect.getargspec(fcFeature).defaults
+                            d_args = inspect.getargspec(fcFeature).args
+                            i_diff = len(d_args) - len(d_defaults)
+                            i_index = d_args.index('lLookback') - i_diff
+                            i_cut = -(d_defaults[i_index]+1)
+                            dTmp[sKey] = dDataRelative[sKey].ix[i_cut:]
+                            #print fcFeature.__name__ + ":" + str(i_cut)
+                            
+                        else:   
+                            dTmp[sKey] = dDataRelative[sKey].ix[ 
+                                         -(ldArgs[i]['lLookback'] + 1):]  
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
             else:
                 ldfRet.append( fcFeature( dDataRelative, **ldArgs[i] ) )
@@ -139,9 +154,23 @@ def applyFeatures( dData, lfcFeatures, ldArgs, sMarketRel=None, sLog=None, bMin=
                 dTmp = {}
                 for sKey in dData:
                     if 'i_bars' in ldArgs[i]:
-                        dTmp[sKey] = dData[sKey].ix[ -(ldArgs[i]['lLookback'] + ldArgs[i]['i_bars']):]
+                        dTmp[sKey] = dData[sKey].ix[ 
+                                     -(ldArgs[i]['lLookback'] + 
+                                     ldArgs[i]['i_bars']+1):]
+                       
                     else:    
-                        dTmp[sKey] = dData[sKey].ix[ -(ldArgs[i]['lLookback'] + 1):]
+                        if 'lLookback' not in ldArgs[i]:
+                            d_defaults = inspect.getargspec(fcFeature).defaults
+                            d_args = inspect.getargspec(fcFeature).args
+                            i_diff = len(d_args) - len(d_defaults)
+                            i_index = d_args.index('lLookback') - i_diff
+                            i_cut = -(d_defaults[i_index]+1)
+                            dTmp[sKey] = dData[sKey].ix[i_cut:]
+                            #print fcFeature.__name__ + ":" + str(i_cut)
+                        else:   
+                            dTmp[sKey] = dData[sKey].ix[ 
+                                     -(ldArgs[i]['lLookback'] + 1):]
+                   
                 ldfRet.append( fcFeature( dTmp, **ldArgs[i] ).ix[-1:] )
             else:
                 ldfRet.append( fcFeature( dData, **ldArgs[i] ) )
