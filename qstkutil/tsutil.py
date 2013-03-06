@@ -135,7 +135,7 @@ def returnize0(nds):
     s= np.shape(nds)
     if len(s)==1:
         nds=np.expand_dims(nds,1)
-    nds[1:, :] = (nds[1:, :] / nds[0:-1]) - 1
+    nds[1:, :] = (nds[1:, :] - nds[0:-1]) / abs(nds[0:-1])
     nds[0, :] = np.zeros(nds.shape[1])
 
 def returnize1(nds):
@@ -150,7 +150,7 @@ def returnize1(nds):
         nds=np.expand_dims(nds,1)
     nds[1:, :] = (nds[1:, :]/nds[0:-1])
     nds[0, :] = np.ones(nds.shape[1])
-    
+
 def priceize1(nds):
     """
     @summary Computes stepwise (usually daily) returns relative to 1, where
