@@ -409,10 +409,15 @@ class _MySQL(DriverInterface):
 
         return sorted([x[0] for x in self.cursor.fetchall()])
 
-    def get_all_symbols(self):
+    def get_all_symbols(self, b_dead=False):
         ''' Returns all symbols '''
-        self.cursor.execute('''select distinct code from asset a where  
-                               a.statuscodeid<100 and a.recordstatus=1''')
+        
+        if b_dead:
+            self.cursor.execute('''select distinct code from asset a where  
+                                   a.statuscodeid<=100 and a.recordstatus=1''')
+        else:
+            self.cursor.execute('''select distinct code from asset a where  
+                                   a.statuscodeid<100 and a.recordstatus=1''')
         return sorted([x[0] for x in self.cursor.fetchall()])
 
     def get_all_lists(self):
