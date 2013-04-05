@@ -182,12 +182,12 @@ class _MySQL(DriverInterface):
         s_pass = open(os.path.join(s_filepath,'pass.txt')).read().rstrip()
         
         try:
-            self.db = MySQLdb.connect("127.0.0.1", "finance", s_pass, "premiumdata", port=3307)
+            self.db = MySQLdb.connect("127.0.0.1", "finance", s_pass, "premiumdata")
         except:
             s_filepath = os.path.dirname(os.path.abspath(__file__))
             # Read password from a file (does not support whitespace)
             s_pass = open(os.path.join(s_filepath,'pass2.txt')).read().rstrip()
-            self.db = MySQLdb.connect("127.0.0.1", "finance", s_pass, "premiumdata", port=3307)
+            self.db = MySQLdb.connect("127.0.0.1", "finance", s_pass, "premiumdata")
 
         self.cursor = self.db.cursor()
 
@@ -322,9 +322,13 @@ class _MySQL(DriverInterface):
         s_query_asset = 'SELECT assetid, ' + query_select_asset_items + \
                        ' FROM asset WHERE assetid in (' +s_idlist +')'
 
-        s_query_dividend = 'SELECT assetid, exdate, ' + query_select_dividend_items + \
+        s_query_dividend = 'SELECT assetid, exdate, recordstatus, ' + query_select_dividend_items + \
                        ' FROM dividend WHERE assetid in (' +s_idlist +')' + \
-                       ' AND date >= %s AND date <= %s '
+                       ' AND exdate >= %s AND exdate <= %s AND recordstatus=1'
+
+        s_query_dilution = 'SELECT assetid, exdate, recordstatus, diltypeid, ' + query_select_dilution_items + \
+                       ' FROM dilution WHERE assetid in (' +s_idlist +')' + \
+                       ' AND exdate >= %s AND exdate <= %s AND recordstatus=1 AND diltypeid in (1,3)'
 
         if len(query_select_tech_items) !=0:
             try:
@@ -400,6 +404,60 @@ class _MySQL(DriverInterface):
                        columns_fund[i][d_id_sym[row[0]]][dt_date] = int((row[
                               i+2]-datetime.date(1970,1,1)).total_seconds())
 
+        if len(query_select_dividend_items)!=0:        
+            try:
+                self.cursor.execute(s_query_dividend, (ts_list[0].replace(hour=0), ts_list[-1]))
+            except:
+                print 'Data error, probably using an non-existent symbol'
+
+            # Retrieve Results
+            results_dividend = self.cursor.fetchall()
+            # print results_dividend
+            # Create Data frames
+            for i in range(len(data_dividend)):
+                columns_dividend.append(pandas.DataFrame(index=ts_list, columns=symbol_list))
+
+            # Loop through rows
+            dt_time = datetime.time(hour=16)
+            for row in results_dividend:
+                #format of row is (sym, date, item1, item2, ...)
+                dt_date = datetime.datetime.combine(row[1], dt_time)
+                if dt_date not in columns_dividend[i].index:
+                    continue
+                # Add all columns to respective data-frames
+                for i in range(len(data_dividend)):
+                    if numpy.isnan(columns_dividend[i][d_id_sym[row[0]]][dt_date]):
+                        columns_dividend[i][d_id_sym[row[0]]][dt_date] = row[i+3]
+                    elif columns_dividend[i][d_id_sym[row[0]]][dt_date] != row[i+3]:
+                        columns_dividend[i][d_id_sym[row[0]]][dt_date] += row[i+3]
+
+        if len(query_select_dilution_items)!=0:        
+            try:
+                self.cursor.execute(s_query_dilution, (ts_list[0].replace(hour=0), ts_list[-1]))
+            except:
+                print 'Data error, probably using an non-existent symbol'
+
+            # Retrieve Results
+            results_dilution = self.cursor.fetchall()
+            # print results_dilution
+            # Create Data frames
+            for i in range(len(data_dilution)):
+                columns_dilution.append(pandas.DataFrame(index=ts_list, columns=symbol_list))
+
+            # Loop through rows
+            dt_time = datetime.time(hour=16)
+            for row in results_dilution:
+                #format of row is (sym, date, item1, item2, ...)
+                dt_date = datetime.datetime.combine(row[1], dt_time)
+                if dt_date not in columns_dilution[i].index:
+                    continue
+                # Add all columns to respective data-frames
+                for i in range(len(data_dilution)):
+                    if numpy.isnan(columns_dilution[i][d_id_sym[row[0]]][dt_date]):
+                        columns_dilution[i][d_id_sym[row[0]]][dt_date] = row[i+4]
+                    elif columns_dilution[i][d_id_sym[row[0]]][dt_date] != row[i+4]:
+                        columns_dilution[i][d_id_sym[row[0]]][dt_date] *= row[i+4]
+
         columns = [numpy.NaN] * len(data_item)
         for i, item in enumerate(li_tech_index):
             columns[item] = columns_tech[i]
@@ -407,6 +465,10 @@ class _MySQL(DriverInterface):
             columns[item] = columns_fund[i]
         for i, item in enumerate(li_asset_index):
             columns[item] = columns_asset[i]
+        for i, item in enumerate(li_dividend_index):
+            columns[item] = columns_dividend[i]
+        for i, item in enumerate(li_dilution_index):
+            columns[item] = columns_dilution[i]
         return columns
 
     def get_dividends(self, ts_list, symbol_list):
@@ -425,7 +487,7 @@ class _MySQL(DriverInterface):
         B.exdate >= %s and B.exdate <= %s and A.code in (
         """ + symbol_query_list + """)""", (ts_list[0].replace(hour=0),
                                              ts_list[-1],))
-        
+
         # Retrieve Results
         results = self.cursor.fetchall()
 
@@ -434,26 +496,26 @@ class _MySQL(DriverInterface):
 
         if len(results) == 0:
             return pandas.DataFrame(columns=symbol_list)
-  
+
         # Create Pandas DataFrame in Expected Format
         current_dict = {}
         symbol_ranges = self._find_ranges_of_symbols(results)
         for symbol, ranges in symbol_ranges.items():
             current_symbol_data = results[ranges[0]:ranges[1] + 1]
-        
+
             current_dict[symbol] = pandas.Series(map(itemgetter(2), 
                                                 current_symbol_data),
                  index=map(lambda x: itemgetter(1)(x) + relativedelta(hours=16), 
                                               current_symbol_data))
 
-                    
+
         # Make DataFrame
         ret = pandas.DataFrame(current_dict, columns=symbol_list)
         return ret.reindex(ts_list)
 
 
     def get_list(self, list_name):
-        
+
         if type(list_name) == type('str') or \
            type(list_name) == type(u'unicode'):
             self.cursor.execute("""select symbol from premiumdata.lists
@@ -642,7 +704,7 @@ if __name__ == "__main__":
     date1 = datetime.datetime(2011, 1, 1, 16)
     date2 = datetime.datetime(2011, 1, 31, 16)
     date3 = datetime.datetime(2012, 9, 29, 16)
-    ts_list = du.getNYSEdays(date1,date2, datetime.timedelta(hours=16))
+    ts_list = du.getNYSEdays(date1,date3, datetime.timedelta(hours=16))
     #print db.get_shares(['GOOG', 'AAPL'])
 
     #print db.get_all_lists()
@@ -653,5 +715,4 @@ if __name__ == "__main__":
     #print db.get_dividends([date1 + datetime.timedelta(days=x) for x in range(100)],
     #                        ["MSFT", "PGF", "GOOG", "A"])
 
-    # db.get_data_hard_read(ts_list, ["MSFT", "AAPL"], ["close","open","latestavailableannual","pe"])
-    print db.get_data_hard_read(ts_list, ["MSFT", "AAPL"], ["gicscode"])
+    db.get_data_hard_read(ts_list, ["MSFT", "AAPL"], ["close","open","latestavailableannual","pe"])
