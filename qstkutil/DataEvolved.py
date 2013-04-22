@@ -220,6 +220,7 @@ class _MySQL(DriverInterface):
         results_dividend = []
         columns_dilution = []
         results_dilution = []
+        columns_insider = []
         # Check input data
         assert isinstance(ts_list, list)
         assert isinstance(symbol_list, list)
@@ -260,6 +261,9 @@ class _MySQL(DriverInterface):
         #Keys to indicator from dilution table
         ls_dilution_keys = ['dilfact']
 
+        #Keys to indicator from insider table
+        ls_insider_keys = ['rating']
+
         data_item = data_item[:]
         data_fund = []
         li_fund_index = []
@@ -271,6 +275,8 @@ class _MySQL(DriverInterface):
         li_dividend_index = []
         data_dilution = []
         li_dilution_index = []
+        data_insider = []
+        li_insider_index = []
         for i, item in enumerate(data_item):
             if item in ls_fund_keys:
                 data_fund.append(item)
@@ -284,6 +290,9 @@ class _MySQL(DriverInterface):
             elif item in ls_dilution_keys:
                 data_dilution.append(item)
                 li_dilution_index.append(i)
+            elif item in ls_insider_keys:
+                data_insider.append(item)
+                li_insider_index.append(i)
             else:
                 data_tech.append(item)
                 li_tech_index.append(i)
@@ -301,6 +310,7 @@ class _MySQL(DriverInterface):
         query_select_asset_items = ",".join(data_asset)
         query_select_dividend_items = ",".join(data_dividend)
         query_select_dilution_items = ",".join(data_dilution)
+        query_select_insider_items = ",".join(data_insider)
 
         # Now convert to ID's 
         self.cursor.execute('''select assetid, code from asset 
@@ -329,7 +339,11 @@ class _MySQL(DriverInterface):
         s_query_dilution = 'SELECT assetid, exdate, recordstatus, diltypeid, ' + query_select_dilution_items + \
                        ' FROM dilution WHERE assetid in (' +s_idlist +')' + \
                        ' AND exdate >= %s AND exdate <= %s AND recordstatus=1 AND diltypeid in (1,3)'
-
+        
+        s_query_insider = 'SELECT assetid, date, ' + query_select_insider_items + \
+                       ' FROM insider_activity WHERE assetid in (' +s_idlist +')' + \
+                       ' AND date >= %s AND date <= %s '
+                       
         if len(query_select_tech_items) !=0:
             try:
                 self.cursor.execute(s_query_tech, (ts_list[0].replace(hour=0), ts_list[-1]))
@@ -457,6 +471,32 @@ class _MySQL(DriverInterface):
                         columns_dilution[i][d_id_sym[row[0]]][dt_date] = row[i+4]
                     elif columns_dilution[i][d_id_sym[row[0]]][dt_date] != row[i+4]:
                         columns_dilution[i][d_id_sym[row[0]]][dt_date] *= row[i+4]
+        
+        if len(query_select_insider_items) != 0:
+            try:
+                print s_query_insider
+                self.cursor.execute(s_query_insider, (ts_list[0].replace(hour=0), ts_list[-1]))
+            except:
+                print 'Data error, probably using an non-existent symbol'
+
+            # Retrieve Results
+            results_insider = self.cursor.fetchall()
+            print results_insider
+            # Create Data frames
+            for i in range(len(results_insider)):
+                columns_insider.append(pandas.DataFrame(index=ts_list, columns=symbol_list))
+
+            # Loop through rows
+            dt_time = datetime.time(hour=16)
+            for row in results_insider:
+                #format of row is (sym, date, item1, item2, ...)
+                dt_date = datetime.datetime.combine(row[1], dt_time)
+                if dt_date not in columns_insider[i].index:
+                    continue
+                # Add all columns to respective data-frames
+                for i in range(len(data_insider)):
+                    print 'Here', d_id_sym[row[0]], row[i+2]
+                    columns_insider[i][d_id_sym[row[0]]][dt_date] = row[i+2]
 
         columns = [numpy.NaN] * len(data_item)
         for i, item in enumerate(li_tech_index):
@@ -469,6 +509,8 @@ class _MySQL(DriverInterface):
             columns[item] = columns_dividend[i]
         for i, item in enumerate(li_dilution_index):
             columns[item] = columns_dilution[i]
+        for i, item in enumerate(li_insider_index):
+            columns[item] = columns_insider[i]
         return columns
 
     def get_dividends(self, ts_list, symbol_list):
@@ -706,9 +748,9 @@ class DataAccess(object):
 if __name__ == "__main__":
     db = DataAccess('mysql')
 
-    date1 = datetime.datetime(2011, 1, 1, 16)
-    date2 = datetime.datetime(2011, 1, 31, 16)
-    date3 = datetime.datetime(2012, 9, 29, 16)
+    date1 = datetime.datetime(2012, 11, 1, 16)
+    date2 = datetime.datetime(2012, 11, 2, 16)
+    date3 = datetime.datetime(2012, 11, 23, 16)
     ts_list = du.getNYSEdays(date1,date3, datetime.timedelta(hours=16))
     #print db.get_shares(['GOOG', 'AAPL'])
 
@@ -720,4 +762,8 @@ if __name__ == "__main__":
     #print db.get_dividends([date1 + datetime.timedelta(days=x) for x in range(100)],
     #                        ["MSFT", "PGF", "GOOG", "A"])
 
-    db.get_data_hard_read(ts_list, ["MSFT", "AAPL"], ["close","open","latestavailableannual","pe"])
+    ldf_data = db.get_data_hard_read(ts_list, ["MSFT", "AAPL"], 
+                                ["close","open","latestavailableannual","pe", "rating"])
+    print ldf_data[0]
+    print ldf_data[-2]
+    print ldf_data[-1]
