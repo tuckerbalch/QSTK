@@ -474,14 +474,12 @@ class _MySQL(DriverInterface):
         
         if len(query_select_insider_items) != 0:
             try:
-                print s_query_insider
                 self.cursor.execute(s_query_insider, (ts_list[0].replace(hour=0), ts_list[-1]))
             except:
                 print 'Data error, probably using an non-existent symbol'
 
             # Retrieve Results
             results_insider = self.cursor.fetchall()
-            print results_insider
             # Create Data frames
             for i in range(len(results_insider)):
                 columns_insider.append(pandas.DataFrame(index=ts_list, columns=symbol_list))
