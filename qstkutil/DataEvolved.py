@@ -253,7 +253,7 @@ class _MySQL(DriverInterface):
                        ]
 
         #Keys to indicator from asset table
-        ls_asset_keys = ['gicscode']
+        ls_asset_keys = ['icbcode']
 
         #Keys to indicator from dividend table
         ls_dividend_keys = ['divamt']
@@ -386,7 +386,10 @@ class _MySQL(DriverInterface):
                 #format of row is (sym, item1, item2, ...)
                 # Add all columns to respective data-frames
                 for i in range(len(data_asset)):
-                    columns_asset[i][d_id_sym[row[0]]] = row[i+1]
+                    if row[i+1] == None:
+                        columns_asset[i][d_id_sym[row[0]]] = float('nan')
+                    else:
+                        columns_asset[i][d_id_sym[row[0]]] = float(row[i+1])
 
         if len(query_select_fund_items)!=0:        
             try:
