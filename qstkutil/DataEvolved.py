@@ -496,7 +496,6 @@ class _MySQL(DriverInterface):
                     continue
                 # Add all columns to respective data-frames
                 for i in range(len(data_insider)):
-                    print 'Here', d_id_sym[row[0]], row[i+2]
                     columns_insider[i][d_id_sym[row[0]]][dt_date] = row[i+2]
 
         columns = [numpy.NaN] * len(data_item)
