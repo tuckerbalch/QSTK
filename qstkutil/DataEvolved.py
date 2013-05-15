@@ -485,15 +485,21 @@ class _MySQL(DriverInterface):
             results_insider = self.cursor.fetchall()
             # Create Data frames
             for i in range(len(data_insider)):
-                columns_insider.append(pandas.DataFrame(index=ts_list, columns=symbol_list))
-
+                columns_insider.append(pandas.DataFrame(index=ts_list, 
+                                       columns=symbol_list).fillna(0))
+                
             # Loop through rows
             dt_time = datetime.time(hour=16)
             for row in results_insider:
                 #format of row is (sym, date, item1, item2, ...)
                 dt_date = datetime.datetime.combine(row[1], dt_time)
                 if dt_date not in columns_insider[i].index:
-                    continue
+                    i_index = columns_insider[i].index.searchsorted(dt_date)
+                    if i_index == 0:
+                        continue
+                    i_index -= 1
+                    dt_new = columns_insider[i].index[i_index]
+                    dt_date = dt_new
                 # Add all columns to respective data-frames
                 for i in range(len(data_insider)):
                     columns_insider[i][d_id_sym[row[0]]][dt_date] = row[i+2]
