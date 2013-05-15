@@ -348,7 +348,7 @@ class _MySQL(DriverInterface):
             try:
                 self.cursor.execute(s_query_tech, (ts_list[0].replace(hour=0), ts_list[-1]))
             except:
-                print 'Data error, probably using an non-existent symbol'
+                print 'Data error1, probably using an non-existent symbol'
             
             # Retrieve Results
             results_tech = self.cursor.fetchall()
@@ -372,7 +372,7 @@ class _MySQL(DriverInterface):
             try:
                 self.cursor.execute(s_query_asset)
             except:
-                print 'Data error, probably using an non-existent symbol'
+                print 'Data error2, probably using an non-existent symbol'
 
             # Retrieve Results
             results_asset = self.cursor.fetchall()
@@ -395,7 +395,7 @@ class _MySQL(DriverInterface):
             try:
                 self.cursor.execute(s_query_fund, (ts_list[0].replace(hour=0), ts_list[-1]))
             except:
-                print 'Data error, probably using an non-existent symbol'
+                print 'Data error3, probably using an non-existent symbol'
             
             # Retrieve Results
             results_fund = self.cursor.fetchall()
@@ -425,7 +425,7 @@ class _MySQL(DriverInterface):
             try:
                 self.cursor.execute(s_query_dividend, (ts_list[0].replace(hour=0), ts_list[-1]))
             except:
-                print 'Data error, probably using an non-existent symbol'
+                print 'Data error4, probably using an non-existent symbol'
 
             # Retrieve Results
             results_dividend = self.cursor.fetchall()
@@ -452,7 +452,7 @@ class _MySQL(DriverInterface):
             try:
                 self.cursor.execute(s_query_dilution, (ts_list[0].replace(hour=0), ts_list[-1]))
             except:
-                print 'Data error, probably using an non-existent symbol'
+                print 'Data error5, probably using an non-existent symbol'
 
             # Retrieve Results
             results_dilution = self.cursor.fetchall()
@@ -479,7 +479,7 @@ class _MySQL(DriverInterface):
             try:
                 self.cursor.execute(s_query_insider, (ts_list[0].replace(hour=0), ts_list[-1]))
             except:
-                print 'Data error, probably using an non-existent symbol'
+                print 'Data error6, probably using an non-existent symbol'
 
             # Retrieve Results
             results_insider = self.cursor.fetchall()
