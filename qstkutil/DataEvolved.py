@@ -484,7 +484,7 @@ class _MySQL(DriverInterface):
             # Retrieve Results
             results_insider = self.cursor.fetchall()
             # Create Data frames
-            for i in range(len(results_insider)):
+            for i in range(len(data_insider)):
                 columns_insider.append(pandas.DataFrame(index=ts_list, columns=symbol_list))
 
             # Loop through rows
