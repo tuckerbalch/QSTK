@@ -386,7 +386,7 @@ class _MySQL(DriverInterface):
                 #format of row is (sym, item1, item2, ...)
                 # Add all columns to respective data-frames
                 for i in range(len(data_asset)):
-                    if row[i+1] == None:
+                    if row[i+1] == None or row[i+1] == '':
                         columns_asset[i][d_id_sym[row[0]]] = float('nan')
                     else:
                         columns_asset[i][d_id_sym[row[0]]] = float(row[i+1])
