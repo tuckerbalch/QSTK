@@ -173,6 +173,7 @@ class _MySQL(DriverInterface):
     def __init__(self):
         # Connection is now handled on a per-call basis
         #self._connect()
+        pass
     
     def __del__(self):
         pass
