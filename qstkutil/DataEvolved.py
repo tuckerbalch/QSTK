@@ -262,7 +262,7 @@ class _MySQL(DriverInterface):
                            ]
     
             #Keys to indicator from asset table
-            ls_asset_keys = ['icbcode']
+            ls_asset_keys = ['icbcode', 'gicscode']
     
             #Keys to indicator from dividend table
             ls_dividend_keys = ['divamt']
