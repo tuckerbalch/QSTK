@@ -323,7 +323,7 @@ class _MySQL(DriverInterface):
     
             # Now convert to ID's 
             self.cursor.execute('''select assetid, code from asset 
-                                   where code in( ''' + symbol_query_list + ''')''')
+                                   where code in( ''' + symbol_query_list + ''') AND recordstatus=1''')
             # Dictionary linking id's:symbols
             d_id_sym = dict(self.cursor.fetchall())
     
