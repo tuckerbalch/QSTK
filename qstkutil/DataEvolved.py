@@ -216,7 +216,11 @@ class _MySQL(DriverInterface):
         @note: If a symbol is not found all the values in the column for that stock will be NaN. Execution then
         continues as usual. No errors are raised at the moment.
         """
-        
+
+        # Validate timestamps and symbol list
+        assert len(symbol_list) == len(set(symbol_list)), "Duplicate symbols"
+        assert len(ts_list) == len(set(ts_list)), "Duplicate timestamps"
+
         self._connect()
         try:
             columns_tech = []
